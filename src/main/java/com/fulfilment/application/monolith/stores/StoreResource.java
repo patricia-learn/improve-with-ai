@@ -53,11 +53,20 @@ public class StoreResource {
       throw new WebApplicationException("Id was invalidly set on request.", 422);
     }
 
+    Store createdStore = persistStoreAndFlush(store);
+    
+    // Notify legacy system after store is committed to database
+    legacyStoreManagerGateway.createStoreOnLegacySystem(createdStore);
+
+    return Response.ok(createdStore).status(201).build();
+  }
+
+  @Transactional
+  private Store persistStoreAndFlush(Store store) {
     store.persist();
-
-    legacyStoreManagerGateway.createStoreOnLegacySystem(store);
-
-    return Response.ok(store).status(201).build();
+    // Flush to ensure the changes are written to the database within the transaction
+    store.flush();
+    return store;
   }
 
   @PUT
@@ -76,7 +85,9 @@ public class StoreResource {
 
     entity.name = updatedStore.name;
     entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
+    entity.flush();
 
+    // Notify legacy system after store is committed to database
     legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
 
     return entity;
@@ -104,6 +115,9 @@ public class StoreResource {
       entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
     }
 
+    entity.flush();
+
+    // Notify legacy system after store is committed to database
     legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
 
     return entity;
