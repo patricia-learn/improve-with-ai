@@ -16,25 +16,44 @@ public class WarehouseRepository implements WarehouseStore, PanacheRepository<Db
 
   @Override
   public void create(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
+    DbWarehouse dbWarehouse = new DbWarehouse();
+    dbWarehouse.businessUnitCode = warehouse.businessUnitCode;
+    dbWarehouse.location = warehouse.location;
+    dbWarehouse.capacity = warehouse.capacity;
+    dbWarehouse.stock = warehouse.stock;
+    dbWarehouse.createdAt = warehouse.createdAt;
+    dbWarehouse.archivedAt = warehouse.archivedAt;
+    this.persist(dbWarehouse);
   }
 
   @Override
   public void update(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    DbWarehouse existing = this.find("businessUnitCode", warehouse.businessUnitCode).firstResult();
+    if (existing != null) {
+      existing.businessUnitCode = warehouse.businessUnitCode;
+      existing.location = warehouse.location;
+      existing.capacity = warehouse.capacity;
+      existing.stock = warehouse.stock;
+      existing.createdAt = warehouse.createdAt;
+      existing.archivedAt = warehouse.archivedAt;
+      this.persist(existing);
+    }
   }
 
   @Override
   public void remove(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'remove'");
+    DbWarehouse existing = this.find("businessUnitCode", warehouse.businessUnitCode).firstResult();
+    if (existing != null) {
+      this.delete(existing);
+    }
   }
 
   @Override
   public Warehouse findByBusinessUnitCode(String buCode) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    DbWarehouse dbWarehouse = this.find("businessUnitCode", buCode).firstResult();
+    if (dbWarehouse != null) {
+      return dbWarehouse.toWarehouse();
+    }
+    return null;
   }
 }
